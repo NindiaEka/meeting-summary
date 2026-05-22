@@ -1,0 +1,31 @@
+{
+    "summary": "Meeting untuk membahas progress AI MoM Notetaker",
+    "key_discussions": [
+        {
+            "topic": "Progress AI MoM Notetaker",
+            "description": "Bahas tentang kemajuan AI MoM Notetaker"
+        }
+    ],
+    "decisions": [
+        {
+            "decision": "AI MoM Notetaker akan diperbarui dalam waktu 2 minggu",
+            "responsibility": "Tim Development"
+        },
+        {
+            "decision": "Fitur baru akan ditambahkan pada versi berikutnya",
+            "responsibility": "Tim Product"
+        }
+    ],
+    "action_items": [
+        {
+            "action_item": "Tim Development akan mengupdate AI MoM Notetaker dalam waktu 2 minggu",
+            "responsibility": "Tim Development",
+            "deadline": "2 minggu"
+        },
+        {
+            "action_item": "Tim Product akan menambahkan fitur baru pada versi berikutnya",
+            "responsibility": "Tim Product",
+            "deadline": "Versi berikutnya"
+        }
+    ]
+}

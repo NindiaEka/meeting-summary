@@ -1,0 +1,118 @@
+Panca: Selamat pagi semua. Hari ini kita akan membahas progress AI MoM Notetaker. Nindia, bisa kasih update status saat ini?
+
+Nindia: Baik. Untuk saat ini kita sudah selesai development modul utama yaitu transcript reading, preprocessing, dan chunking. Sistem sudah bisa membaca file audio dalam format MP3 dan WAV, mengkonversi ke text menggunakan Groq API, dan melakukan preprocessing sederhana seperti normalisasi whitespace dan removal timestamp.
+
+Budi: Bagus. Kemarin saya juga sudah integrate dengan database untuk menyimpan transcript raw. Saat ini kita pakai PostgreSQL. Response time untuk insert data masih around 2 detik untuk transcript 10 menit.
+
+Siti: Dari QA side, kami sudah mulai testing modul preprocessing. Ditemukan beberapa edge case seperti handling special characters dan multiple speaker names. Overall accuracy masih 85%, kurang dari target 95%.
+
+Panca: OK, jadi ada gap di accuracy preprocessing. Apa actionable untuk improve ini?
+
+Nindia: Kami perlu refine regex pattern untuk handling special characters, dan tambah logic untuk detect speaker transitions lebih akurat. Estimasi bisa increase accuracy jadi 92-95% dalam 3-4 hari development.
+
+Panca: Noted. Prioritas tinggi ini karena akan affect kualitas final summary. Nindia, bisa handle dalam sprint ini?
+
+Nindia: Ya, tapi perlu remove task yang lain. Saat ini saya juga sedang develop chunking logic. Bisa perlu extend timeline 5-7 hari jika ambil dua tasks bersamaan.
+
+Panca: Baik, kita adjust prioritas. Chunking bisa delay sampai minggu depan. Fokus dulu improve preprocessing accuracy sampai target 95%.
+
+Panca: Untuk summarization side, bagaimana progress?
+
+Nindia: Saya sudah test beberapa prompt template untuk extracting summary, key discussions, decisions, dan action items dari transcript. Model Groq (llama-3-70b) lumayan bagus tapi consistency masih jadi issue. Kadang output bukan JSON valid atau ada field yang kosong.
+
+Budi: Hal ini bisa karena prompt yang belum optimal. Saya punya beberapa research tentang prompt engineering best practices. Bisa kita improve prompt dengan lebih detail instruction dan contoh output format.
+
+Panca: Bagus. Nindia dan Budi, bisa collaborate untuk improve prompt template? Nindia, berapa effort dibutuhkan?
+
+Nindia: Estimated 2-3 hari untuk research, develop, dan test berbagai prompt variation. Siti juga perlu participate untuk QA testing.
+
+Siti: Sure. Saya juga punya note tentang output field yang sering kosong. Bisa kita prioritize improve bagian itu.
+
+Panca: Nindia dan Budi akan collaborate improve prompt template. Timeline end of this week. Siti, bisa prepare QA test cases untuk evaluate output quality?
+
+Siti: Oke, siap.
+
+Eko: Dari DevOps side, infrastructure sudah siap. Kami sudah setup Docker container untuk development environment. Production environment masih need approval dari IT team.
+
+Panca: Apa timeline untuk production approval?
+
+Eko: Estimasi 1 minggu. IT team perlu review security, backup strategy, dan disaster recovery plan. Saya sudah mulai prepare documentation.
+
+Panca: OK. Eko, bisa expedite ini dengan IT? Kita butuh production ready end of June.
+
+Eko: Saya akan follow up dengan IT tomorrow. Tapi security review biasanya take 5-7 business days.
+
+Budi: Dari backend side, kita juga perlu prepare API documentation untuk frontend team. Saat ini belum ada.
+
+Panca: OK. That's important. Budi, bisa handle dokumentasi API?
+
+Budi: Yes, saya bisa prepare. Biasanya 2 hari untuk dokumentasi lengkap include examples dan test cases.
+
+Panca: Eko akan follow up production approval dengan IT. Budi akan prepare API documentation. Both target end of week.
+
+Panca: Resource-wise, saat ini kita ada 3 dev, 1 QA, 1 DevOps. Nindia, ini cukup untuk hit Q2 target?
+
+Nindia: Untuk saat ini cukup, tapi untuk phase 2 (integrasi email/WhatsApp automation) kemungkinan perlu tambah 1 dev untuk 2 bulan. Juga perlu consider capacity untuk production support.
+
+Panca: OK. Budget-wise, kita punya approval untuk hire contract developer. Siti, kita juga perlu allocate budget untuk testing tools dan APIs.
+
+Siti: Ya. Untuk QA automation, kita butuh budget untuk testing tool subscription (sekitar $500/month). Juga butuh API quota untuk testing environment.
+
+Panca: Berapa API quota budget?
+
+Nindia: Groq API usage saat ini masih free tier (120 requests/day). Untuk production, depending on usage, bisa antara $200-500/month. Kita estimate low untuk now dan adjust later.
+
+Panca: Approve budget untuk QA testing tools ($500/month) dan Groq API (start dengan $300/month budget). Nindia, bisa manage allocation?
+
+Nindia: Ya, akan urus.
+
+Panca: Mari discuss risks. Siti, apa top risks dari testing perspective?
+
+Siti: Top 3 risks: Pertama, accuracy summarization masih belum tested dengan large dataset - baru tested dengan 5-10 meeting samples. Kedua, Groq API rate limiting - tidak ada backup LLM provider. Ketiga, data handling untuk confidential meeting content - belum ada encryption.
+
+Panca: Good point. Nindia, untuk accuracy testing, bisa prepare test dataset lebih besar?
+
+Nindia: Bisa. Tapi need access ke actual company meeting recordings. Saya sudah contact HR, mereka willing provide 50 anonymized meeting recording untuk testing.
+
+Panca: Great. Prioritas ini untuk next sprint. Untuk backup LLM provider, sebaiknya kita add OpenAI sebagai fallback. Nindia, estimate effort?
+
+Nindia: Medium. Maybe 2-3 hari untuk integration dan testing fallback logic.
+
+Panca: OK, so Nindia akan prepare large test dataset dengan 50 meeting samples - target next week. Add OpenAI sebagai backup LLM provider - prioritas untuk sprint 2. Budi akan design encryption untuk confidential content - estimate 3-4 hari.
+
+Panca: OK. Untuk Q2 schedule, ini seperti yang direncanakan:
+- Sprint 1 (May 21-31): Improve preprocessing accuracy, finalize prompt template, API documentation
+- Sprint 2 (June 1-15): Add backup LLM provider, encryption, large dataset testing
+- Sprint 3 (June 16-30): Production deployment, email/WhatsApp integration phase 1
+
+Nindia: Sprint 1 timeline terlihat tight. Kami juga butuh time untuk refactoring code dan update documentation.
+
+Panca: Bagus point. Mari kita adjust. Sprint 1 extend jadi May 21 - June 5. Yang bisa dicapai dalam timeline ini: Preprocessing accuracy improvement target 95%, prompt template finalization, API documentation, initial code refactoring. Sprint 2 June 6-20: backup provider, encryption, testing. Sprint 3 June 21-30: deployment dan optimization. Ini lebih realistis?
+
+Nindia: Ya, ini lebih reasonable. Semua team agree?
+
+Budi: Agree. Ini kasih kita breathing room untuk quality.
+
+Siti: Setuju. Juga lebih cukup waktu untuk proper QA testing.
+
+Panca: Satu hal penting - documentation dan knowledge sharing. Saat ini dokumentasi masih scattered. Nindia sudah mulai?
+
+Nindia: Ya. Saya sudah mulai dokumentasi architecture dan pipeline flow. Juga sudah buat diagram untuk system component. Target selesai end of this month.
+
+Eko: Saya juga perlu add dokumentasi untuk infrastructure setup dan DevOps procedures.
+
+Panca: Good. Budi, bisa add dokumentasi untuk database schema dan API spec?
+
+Budi: Ya. Saya akan coordinate dengan Nindia untuk consistency.
+
+Panca: Semua team members akan contribute dokumentasi untuk area mereka. Consolidated dokumentation target June 10. Format: Markdown dalam Git repo.
+
+Panca: OK. Untuk action items clear? Nindia, resume untuk team?
+
+Nindia: Sure. Key action items: Nindia akan improve preprocessing accuracy ke 95% target May 28. Nindia dan Budi finalize prompt template target May 31. Budi prepare API documentation target May 31. Eko follow up production approval dengan IT target May 24. Siti prepare large test dataset access target May 25. Budi design encryption untuk confidential content target June 3. Semua contribute dokumentasi area mereka target June 10.
+
+Panca: Perfect. Follow up meeting scheduled untuk next week (May 28) untuk review progress. Jika ada blockers atau urgent issues, update di Slack immediately.
+
+Semua: OK.
+
+Panca: Terima kasih semua. Excellent discussion. Meeting closed.

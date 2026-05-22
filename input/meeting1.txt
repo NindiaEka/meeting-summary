@@ -1,0 +1,39 @@
+Meeting AI MoM Notetaker
+Tanggal: 11 Mei 2026
+
+Panca:
+Hari ini kita fokus membahas prototype AI MoM Notetaker. Untuk tahap awal kita akan fokus pada transcript summarization terlebih dahulu sebelum masuk ke audio processing.
+
+Nindia:
+Saat ini sistem sudah berhasil membaca transcript text dan mengirimkannya ke LLM menggunakan Groq API melalui LangChain.
+
+Panca:
+Bagus. Untuk output sementara kita fokus ke JSON dulu karena nanti lebih mudah dipakai untuk backend dan frontend integration.
+
+Nindia:
+Saya juga sudah mulai mencoba preprocessing sederhana untuk membersihkan transcript seperti menghapus timestamp dan extra spaces.
+
+Panca:
+Oke. Selanjutnya perlu dipikirkan chunking karena transcript meeting biasanya cukup panjang dan model memiliki context limit.
+
+Nindia:
+Sekarang transcript dibagi menjadi beberapa chunk dan masing-masing chunk diringkas secara terpisah.
+
+Panca:
+Nanti hasil tiap chunk perlu digabung lagi menjadi satu hasil final supaya tidak ada informasi yang berulang.
+
+Nindia:
+Untuk saat ini hasil summary masih disimpan ke file JSON. Selanjutnya mungkin bisa ditambahkan export DOCX.
+
+Panca:
+Oke. Untuk deployment sementara tidak perlu terlalu kompleks. Fokus dulu memahami flow pipeline dan dokumentasi architecture.
+
+Nindia:
+Baik. Saya juga mulai mendokumentasikan alasan penggunaan Groq, LangChain, dan preprocessing pipeline.
+
+Panca:
+Bagus. Untuk automation nanti bisa dipikirkan integrasi email atau WhatsApp menggunakan n8n atau backend Python langsung.
+
+Nindia:
+Noted. Untuk saat ini saya akan fokus stabilisasi prototype terlebih dahulu.
+
