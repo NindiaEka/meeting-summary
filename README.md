@@ -119,6 +119,10 @@ Create `.env` file:
 ```env
 GROQ_API_KEY=your_api_key
 LLM_MODEL=llama-3.1-8b-instant
+WHISPER_MODEL=base
+
+CHUNK_SIZE=3000
+CHUNK_OVERLAP=200
 ```
 
 ---
