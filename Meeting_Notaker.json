@@ -123,7 +123,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"jid\": \"6282116596538@s.whatsapp.net\",\n  \"message\": {\n    \"text\": {{ $node['Filter'].json['message_wa'] }}\n  }\n}",
+        "jsonBody": "={\n  \"jid\": \"6282116596538@s.whatsapp.net\",\n  \"message\": {\n    \"text\": {{ $node['Filter'].json['message_wa'].toJsonString() }}\n  }\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -261,7 +261,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "5c24de83-119a-4abb-bcf1-be4b20880fee",
+  "versionId": "8ae49565-ef02-4bb4-942e-81020337323e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "edc43a907284f09c55d8f891a9e148851a5fb3ece66e6d0d855ff2bdc748f61d"

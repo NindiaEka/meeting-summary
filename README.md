@@ -4,16 +4,6 @@ Sistem otomatisasi notulen rapat (*Minutes of Meeting*) berbasis kecerdasan buat
 
 ---
 
-## Akses Cepat (Link Form)
-
-Setelah seluruh layanan Docker menyala, kamu atau tim bisa langsung membuka formulir pengunggahan file rapat melalui link di bawah ini tanpa perlu menghafal UUID:
-
- **[KLIK DI SINI UNTUK MEMBUKA FORM NOTETAKER](http://localhost:5678/form/8c4e5c1b-304b-4de4-bb62-269da987c7f0)**
-
-*Disarankan untuk menyimpan link ini di Bookmarks Bar browser kamu (`Ctrl + D`) atau klik file shortcut **"Buka Form MoM"** yang ada di folder utama.*
-
----
-
 ##  Fitur Utama
 
 - **AI-Powered Summarization:** Ekstraksi otomatis poin rapat menggunakan Llama 3 via Groq API.
