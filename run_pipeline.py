@@ -7,7 +7,7 @@ import json
 
 logger.info("Starting AI MoM application...")
 
-file_path = ("D:\\Sisindokom\\AI-MoM-Notaker\\input\\meeting_detailed.txt")
+file_path = ("C:\\Users\\MSI\\Downloads\\MoM-Notaker\\MoM\\meeting-summary\\input\\example.vtt")
 
 final_result = process_meeting(file_path)
 

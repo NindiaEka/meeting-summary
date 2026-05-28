@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # 1. Service MoM Notaker (FastAPI)
+  fastapi-ai:
+    image: python:3.11-slim
+    container_name: MoM-Notetaker
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - uv-cache:/root/.cache/uv  
+    working_dir: /app
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: >
+      sh -c "pip install uv && 
+             python -m uv pip install --system -r pyproject.toml && 
+             python -m uvicorn app.app:app --host 0.0.0.0 --port 8000 --reload"
+    restart: unless-stopped
+
+  # 2. Service n8n Automation
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n-prod
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_SECURE_COOKIE=false
+    restart: unless-stopped
+
+  # 3. Service WhatsApp API (Baileys)
+  wa-api:
+    image: wa-api-v4-wa-api
+    container_name: wa-api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./auth_info_baileys:/app/auth_info_baileys
+    restart: unless-stopped
+
+volumes:
+  uv-cache:

@@ -31,6 +31,7 @@ AUDIO_EXTENSIONS = (
     ".mp3",
     ".wav",
     ".m4a",
+    ".mpeg",
     ".mp4"
 )
 
