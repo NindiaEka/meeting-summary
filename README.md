@@ -78,6 +78,35 @@ Buka dashboard otomasi n8n di browser: http://localhost:5678
 
 Aktifkan workflow tersebut (geser sakelar ke posisi Active di pojok kanan atas).
 
+#### Panduan Integrasi WhatsApp & Email (Wajib di Awal)
+
+Agar fitur pengiriman otomatis (Dual-Channel Delivery) ke WhatsApp dan Email berjalan dengan lancar, kamu wajib melakukan inisialisasi dua gerbang komunikasi ini saat pertama kali setup:
+
+### 1. Aktivasi & Koneksi WhatsApp API (Baileys)
+Service `wa-api` berjalan secara mandiri di port `3000`. Agar sistem bisa mengirimkan chat atas nama nomor WhatsApp kamu, ikuti trik sinkronisasi ini:
+
+1. Pastikan seluruh container Docker sudah menyala (`docker compose up -d`).
+2. Buka aplikasi **Docker Desktop** di laptop kamu.
+3. Klik pada container bernama **`wa-api`**, lalu masuk ke tab **Logs**.
+4. Di terminal log tersebut, kamu akan melihat sebuah **QR Code** berukuran besar yang dicetak oleh sistem Baileys.
+5. Ambil HP kamu, buka **WhatsApp** -> ketuk menu **Perangkat Tertaut (Linked Devices)** -> klik **Tautkan Perangkat**, lalu arahkan kamera HP untuk **Scan QR Code** yang ada di log Docker tersebut.
+6. Begitu sukses, log Docker akan memunculkan tulisan `[WA-API] Connection Open / Logged In`. 
+7. *Keunggulan Sistem:* Token login akan otomatis terkunci di dalam folder `./auth_info_baileys` di laptopmu. Jadi, meskipun Docker kamu matikan atau laptop kamu restart, WhatsApp akan **tetap otomatis login** selamanya tanpa perlu scan ulang!
+
+### 2. Konfigurasi Pengiriman Email via Google (GCP / App Password)
+Workflow n8n membutuhkan akses aman ke server SMTP Google agar bisa mengirim notifikasi notulen rapat via Gmail kamu. Karena Google melarang penggunaan password utama demi keamanan, kita wajib menggunakan **App Password**:
+
+1. Buka pengaturan akun Google kamu di [Google Account Security](https://myaccount.google.com/security).
+2. Pastikan Akun Google kamu sudah mengaktifkan **Verifikasi 2 Langkah (2-Step Verification)**.
+3. Ketik kata kunci **"Sandi Aplikasi"** atau **"App Passwords"** pada kolom pencarian di bagian atas akun Google kamu.
+4. Buat sandi aplikasi baru, beri nama (contoh: `n8n MoM Notetaker`), lalu klik **Buat (Create)**.
+5. Google akan memunculkan **16 digit kode rahasia** (tanpa spasi). Salin kode tersebut!
+6. Buka dashboard **n8n** (`http://localhost:5678`), masuk ke node **Gmail / SMTP Email**, lalu masukkan kredensial berikut:
+   - **User:** Email Gmail kamu (`emailkamu@gmail.com`)
+   - **Password:** Masukkan *16 digit kode Sandi Aplikasi* yang kamu salin tadi (bukan password email utama kamu).
+   - **SSL/TLS:** Enabled (Port 465) atau STARTTLS (Port 587).
+7. Klik **Test Connection** di n8n untuk memastikan email siap mengirim rangkuman rapat secara otomatis.
+
 ## Endpoint Developer & Swagger UI
 Jika kamu ingin menguji performa backend AI secara manual atau membaca spesifikasi skema datanya, kamu bisa mengakses Dokumentasi API Interaktif (Swagger UI) pada alamat berikut:
 
