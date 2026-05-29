@@ -82,7 +82,7 @@ Aktifkan workflow tersebut (geser sakelar ke posisi Active di pojok kanan atas).
 
 Agar fitur pengiriman otomatis (Dual-Channel Delivery) ke WhatsApp dan Email berjalan dengan lancar, kamu wajib melakukan inisialisasi dua gerbang komunikasi ini saat pertama kali setup:
 
-### 1. Aktivasi & Koneksi WhatsApp API (Baileys)
+#### 1. Aktivasi & Koneksi WhatsApp API (Baileys)
 Service `wa-api` berjalan secara mandiri di port `3000`. Agar sistem bisa mengirimkan chat atas nama nomor WhatsApp kamu, ikuti trik sinkronisasi ini:
 
 1. Pastikan seluruh container Docker sudah menyala (`docker compose up -d`).
@@ -93,7 +93,7 @@ Service `wa-api` berjalan secara mandiri di port `3000`. Agar sistem bisa mengir
 6. Begitu sukses, log Docker akan memunculkan tulisan `[WA-API] Connection Open / Logged In`. 
 7. *Keunggulan Sistem:* Token login akan otomatis terkunci di dalam folder `./auth_info_baileys` di laptopmu. Jadi, meskipun Docker kamu matikan atau laptop kamu restart, WhatsApp akan **tetap otomatis login** selamanya tanpa perlu scan ulang!
 
-### 2. Konfigurasi Pengiriman Email via Google (GCP / App Password)
+#### 2. Konfigurasi Pengiriman Email via Google (GCP / App Password)
 Workflow n8n membutuhkan akses aman ke server SMTP Google agar bisa mengirim notifikasi notulen rapat via Gmail kamu. Karena Google melarang penggunaan password utama demi keamanan, kita wajib menggunakan **App Password**:
 
 1. Buka pengaturan akun Google kamu di [Google Account Security](https://myaccount.google.com/security).
