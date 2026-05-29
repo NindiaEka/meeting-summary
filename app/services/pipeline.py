@@ -66,21 +66,32 @@ def process_text(transcript):
             f"Processing chunk {idx + 1}"
         )
 
+        # UPGRADE PROMPT CHUNK: Memaksa AI mengekstrak detail maksimal per bagian
         prompt = f"""
-Buatkan Minutes of Meeting dari transcript berikut.
+You are an expert Corporate Secretary. Analyze this transcript chunk and extract highly detailed information for Minutes of Meeting (MoM). Do not oversimplify.
 
-Output wajib JSON valid dengan format:
-
+Output MUST be a valid JSON with this exact format (Use professional Indonesian):
 {{
-    "summary": "",
-    "key_discussions": [],
-    "decisions": [],
-    "action_items": []
+    "summary": "Tuliskan ringkasan naratif yang panjang, padat, dan komprehensif dari chunk ini (minimal 1-2 paragraf lengkap). Jelaskan latar belakang dan konteks bisnis dari topik dibahas.",
+    "key_discussions": [
+        "Detail pembahasan topik A termasuk latar belakang, tantangan teknis/operasional, dan argumen yang muncul",
+        "Detail pembahasan topik B termasuk alasan, perbandingan opsi, dan analisis situasi lapangan"
+    ],
+    "decisions": [
+        "Keputusan resmi resmi yang disepakati beserta alasan atau dasar hukum/bisnisnya"
+    ],
+    "action_items": [
+        "Tugas spesifik A [PIC: Tim Terkait/Sebutkan Nama] [Deadline: Sebutkan jika ada/ASAP]",
+        "Tugas spesifik B [PIC: Tim Terkait/Sebutkan Nama] [Deadline: Sebutkan jika ada/ASAP]"
+    ]
 }}
 
-Gunakan hanya informasi dari transcript.
+STRICT RULES:
+1. Write 100% in professional Indonesian.
+2. Provide rich, long, and informative text for each field. Avoid single-word or short bullet points.
+3. If PIC or deadline information is not explicitly mentioned, append '[PIC: Akan ditentukan / Tim Terkait]' or '[Deadline: Segera]'.
 
-Transcript:
+Transcript Chunk:
 {chunk}
 """
 
@@ -111,23 +122,38 @@ Transcript:
         "Generating final summary..."
     )
 
+    # UPGRADE FINAL PROMPT: Konsolidasi total menjadi dokumen MoM eksekutif yang kaya insight
     final_prompt = f"""
-Gabungkan hasil summary meeting berikut
-menjadi final Minutes of Meeting.
+You are an expert Project Manager. Consolidate the following meeting summary data into a comprehensive, highly detailed, and professional corporate Minutes of Meeting (MoM). Your goal is to give maximum operational insights to the team.
 
-Output wajib JSON valid:
-
+Output MUST be a valid JSON with this exact format (Use professional Indonesian):
 {{
-    "summary": "",
-    "key_discussions": [],
-    "decisions": [],
-    "action_items": []
+    "summary": "Tuliskan ringkasan eksekutif secara mendalam dan naratif (minimal 2-3 paragraf panjang). Harus mencakup latar belakang pertemuan, tantangan utama yang dibahas (seperti integrasi sistem Singapura-Indonesia, kebutuhan spesifikasi 2 VCPU, migrasi database via PCBU, administrasi SPASPS/SPH/DPG/topner, dan pameran/survei), serta arah strategis perusahaan.",
+    "key_discussions": [
+        "**Integrasi & Pengembangan API:** Penjelasan detail mengenai rencana menghubungkan Singapura ke Indonesia, urgensi, hambatan teknis, dan arsitekturnya.",
+        "**Infrastruktur & Spesifikasi VCPU:** Detail alasan teknis pemilihan spesifikasi 2 VCPU untuk pengembangan sistem baru serta kapasitas performa yang ditargetkan.",
+        "**Migrasi Data & Database Baru:** Konteks mendalam mengenai penggunaan PCBU, transisi ke database baru, mitigasi risiko kehilangan data, dan timeline kerja.",
+        "**Aspek Komersial, Kontrak & Legalitas:** Penjelasan komprehensif mengenai kontrak BP city, lisensi impor, pemenuhan dokumen SPASPS, SPH (Service Point of Interaction), DPG, dan koordinasi finansial (FI).",
+        "**Survei & Strategi Lapangan:** Hasil temuan lapangan mengenai survei target serta persiapan materi presentasi internal ('gua')."
+    ],
+    "decisions": [
+        "Keputusan resmi A yang diambil beserta urgensi atau argumen dasarnya.",
+        "Keputusan resmi B terkait infrastruktur/legalitas beserta penjelasannya."
+    ],
+    "action_items": [
+        "[ ] **Pengembangan API Regional:** Tim Dev/PIC wajib menyelesaikan arsitektur API penghubung Singapura-Indonesia termasuk enkripsi data [Target: ASAP/Sebutkan Timeline].",
+        "[ ] **Migrasi Data via PCBU:** Tim Data Engineer melakukan uji coba (dry-run) migrasi data ke database baru guna memastikan nol risiko data corrupt [Target: ASAP/Sebutkan Timeline].",
+        "[ ] **Finalisasi Dokumen Legal & Lisensi:** Tim Legal/Operasional segera merampungkan administrasi SPASPS, SPH, kontrak BP city, serta kebutuhan lisensi impor [Target: ASAP/Sebutkan Timeline].",
+        "[ ] **Survei Lapangan & Dokumentasi:** Tim Terkait menyusun laporan lengkap hasil survei target untuk bahan presentasi final [Target: ASAP/Sebutkan Timeline]."
+    ]
 }}
 
-Gabungkan keputusan dan action items
-yang muncul pada summary meeting.
+STRICT RULES:
+1. Do not use short bullet points for the summary or key discussions. Force the AI to output detailed, long, and rich text.
+2. Write 100% in professional Indonesian.
+3. Keep the JSON keys exactly as requested.
 
-Summary Meeting:
+Summary Meeting Data:
 {combined_summary}
 """
 
