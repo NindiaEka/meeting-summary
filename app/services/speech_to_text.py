@@ -1,33 +1,25 @@
-import whisper
 import os
 
-from app.utils.logger import logger
+from app.services.providers.stt.local_whisper_stt import local_whisper_transcribe
+from app.services.providers.stt.groq_stt import groq_transcribe
+from app.services.providers.stt.openai_stt import openai_transcribe
+from app.services.providers.stt.gemini_stt import gemini_transcribe
 
 
-model = whisper.load_model(os.getenv("WHISPER_MODEL"))
+def transcribe_audio(file_path: str) -> str:
 
+    provider = os.getenv("STT_PROVIDER", "groq")
 
-def transcribe_audio(file_path):
+    if provider == "local":
+        return local_whisper_transcribe(file_path)
 
-    logger.info("Starting audio transcription...")
+    elif provider == "groq":
+        return groq_transcribe(file_path)
 
-    result = model.transcribe(
-        file_path,
-        initial_prompt="""
-        Ini adalah meeting kerja profesional.
+    elif provider == "openai":
+        return openai_transcribe(file_path)
 
-        Fokus pada:
-        - diskusi proyek
-        - timeline
-        - technical discussion
-        - action items
-        - keputusan meeting
-        - nama tools teknologi
-        - nama produk
-        - istilah IT dan bisnis
-        """
-    )
+    elif provider == "gemini":
+        return gemini_transcribe(file_path)
 
-    logger.info("Audio transcription completed.")
-
-    return result["text"]
+    raise ValueError(f"Unknown STT provider: {provider}")

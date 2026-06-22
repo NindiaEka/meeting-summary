@@ -28,17 +28,17 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.5,
       "position": [
-        0,
-        0
+        128,
+        -80
       ],
-      "id": "82a43dea-a47f-4ecf-a5e8-7c5a884a7ed8",
+      "id": "f4614b96-ef5c-4b73-a2f8-274610c05050",
       "name": "On form submission",
-      "webhookId": "413aaaf0-57ab-4f94-8761-2e7ea621b782"
+      "webhookId": "c05e11a2-f06c-4044-a038-51d1be909245"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "http://fastapi-ai:8000/summarize",
+        "url": "http://202.91.30.243:8000/summarize",
         "sendBody": true,
         "contentType": "multipart-form-data",
         "bodyParameters": {
@@ -55,10 +55,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        224,
-        0
+        352,
+        -80
       ],
-      "id": "93c25e02-42ef-434a-a077-398c19036f57",
+      "id": "e9081f1c-a0c5-48e3-992b-5172d9de2bb2",
       "name": "HTTP Request"
     },
     {
@@ -68,10 +68,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        432,
-        0
+        560,
+        -80
       ],
-      "id": "e2a831e2-5e29-4cd5-b05c-30e97f1e457f",
+      "id": "75a4c5c8-4520-4053-8568-14d60f86182b",
       "name": "Code in JavaScript"
     },
     {
@@ -102,16 +102,16 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        848,
-        0
+        976,
+        -80
       ],
-      "id": "20c5eee9-19c5-43bb-b2c4-1bca47294dbd",
+      "id": "6ebe96f2-4b4e-4145-94d1-8e39dfec5a20",
       "name": "Filter"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "http://host.docker.internal:3000/api/send-message",
+        "url": "http://202.91.30.242:3000/api/send-message",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -123,16 +123,16 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"jid\": \"6282116596538@s.whatsapp.net\",\n  \"message\": {\n    \"text\": {{ $node['Filter'].json['message_wa'].toJsonString() }}\n  }\n}",
+        "jsonBody": "={\n  \"jid\": \"{{ $node['On form submission'].json['destination'] + '@s.whatsapp.net' }}\",\n  \"message\": {\n    \"text\": {{ $node['Filter'].json['message_wa'].toJsonString() }}\n  }\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1056,
-        0
+        1184,
+        -80
       ],
-      "id": "d5b1bbd9-a098-4be5-8354-56880dd162cc",
+      "id": "20704cad-8fc0-4748-b08f-ab0633965043",
       "name": "HTTP Request1"
     },
     {
@@ -163,32 +163,33 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        848,
-        176
+        976,
+        96
       ],
-      "id": "48204378-4454-4240-81ad-81928e8f363b",
+      "id": "3d0c18eb-5b82-4e58-aadb-541cf2258a63",
       "name": "Filter1"
     },
     {
       "parameters": {
-        "sendTo": "={{ $node[\"On form submission\"].json[\"Destination Email\"] }}",
+        "fromEmail": "dhomanhuri@gmail.com",
+        "toEmail": "={{ $node[\"On form submission\"].json[\"Destination Email\"] }}",
         "subject": "=Minutes of Meeting: {{ $node[\"On form submission\"].json[\"Nama Rapat\"] || \"Sesi Diskusi\" }} - {{ new Date().toLocaleDateString('id-ID') }}",
-        "message": "={{ $node[\"Filter1\"].json[\"message_email\"] }}",
+        "html": "={{ $node[\"Filter1\"].json[\"message_email\"] }}",
         "options": {}
       },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
       "position": [
-        1056,
-        176
+        1184,
+        96
       ],
-      "id": "303f6b3d-1316-4c26-8feb-14c7117cd403",
-      "name": "Send a message",
-      "webhookId": "9e6f28cc-dd0a-4b3e-a3ab-ef9b6fde9622",
+      "id": "01f8a111-0977-45a9-af0a-30da2959fc83",
+      "name": "Send an Email",
+      "webhookId": "4a9c020e-e481-46a2-93f3-f89456b2cb68",
       "credentials": {
-        "gmailOAuth2": {
-          "id": "WXbQ90Zspynhn5Tq",
-          "name": "Gmail account"
+        "smtp": {
+          "id": "tC10gclxhbYxXIKg",
+          "name": "SMTP account"
         }
       }
     }
@@ -248,7 +249,7 @@
       "main": [
         [
           {
-            "node": "Send a message",
+            "node": "Send an Email",
             "type": "main",
             "index": 0
           }
@@ -256,16 +257,18 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": false
   },
-  "versionId": "8ae49565-ef02-4bb4-942e-81020337323e",
+  "versionId": "ff0df69e-e323-4a8a-9cca-0fb810f4c79c",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "edc43a907284f09c55d8f891a9e148851a5fb3ece66e6d0d855ff2bdc748f61d"
+    "instanceId": "64d2eb92ddd92d525b4d5332148ee1837a8ef73873bb3559d5fb6fef8921883c"
   },
-  "id": "jmmGz8MJsRgRuUJ7",
+  "nodeGroups": [],
+  "id": "6wq977Riz5PbaOB8",
   "tags": []
 }

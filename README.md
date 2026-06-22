@@ -1,115 +1,276 @@
-# MoM Notetaker
+# AI MoM Notetaker
 
-Sistem otomatisasi notulen rapat (*Minutes of Meeting*) berbasis kecerdasan buatan (AI) menggunakan **FastAPI**, **Groq LLM (Llama 3)**, **n8n Automation**, dan **WhatsApp Gateway API (Baileys)**. Seluruh ekosistem ini sudah dikemas penuh ke dalam **Docker Compose** agar portabel dan siap dijalankan di laptop mana pun dengan instan.
-
----
-
-##  Fitur Utama
-
-- **AI-Powered Summarization:** Ekstraksi otomatis poin rapat menggunakan Llama 3 via Groq API.
-- **Audio Transcription Support:** Transkripsi file rekaman suara menjadi teks mentah secara otomatis.
-- **Full Docker Stack:** Sekali ketik, seluruh service (FastAPI + n8n + WhatsApp API) langsung menyala bersamaan.
-- **Ultra-Fast Dependencies Management:** Sinkronisasi library Python otomatis menggunakan paket manager `uv` yang super cepat di dalam Docker.
-- **Dual-Channel Delivery:** Hasil Minutes of Meeting (MoM) otomatis dikirimkan ke **Email (Gmail)** dan **WhatsApp** (Personal Chat maupun WhatsApp Group).
+AI-powered Minutes of Meeting generator built with FastAPI and multiple AI providers.
 
 ---
 
-##  Struktur Project (Final)
+## Features
 
-Aplikasi ini memiliki susunan folder portabel sebagai berikut:
+* Audio and transcript processing
+* Speech-to-Text provider abstraction
 
-```bash
+  * Groq
+  * OpenAI
+  * Gemini
+  * Local Whisper (optional)
+* LLM provider abstraction
+
+  * Groq
+  * OpenAI
+  * Gemini
+  * Anthropic
+* Automatic text chunking
+* Meeting summarization
+* Decision extraction
+* Action item extraction
+* JSON output
+* WhatsApp and Email integration via n8n
+* Docker support
+* Railway deployment
+
+---
+
+# Project Structure
+
+```text
 meeting-summary/
-├── app/                        # Script utama backend FastAPI
-│   ├── routers/                # Endpoint router (summarize.py)
-│   ├── schemas/                # Validasi skema Pydantic (mom_schema.py)
-│   ├── services/               # Core AI (pipeline, chunking, transcription)
-│   └── utils/                  # Utility helper & Logger internal
-│   └── app.py                  # Entrypoint inisialisasi FastAPI
-├── auth_info_baileys/          # FOLDER KRUSIAL: Menyimpan token auto-login WhatsApp
-├── input/                      # Tempat penyimpanan sementara file audio masuk
-├── outputs/                    # Tempat penyimpanan file hasil transkripsi/notulen
-├── .env                        # File konfigurasi API Key dan model LLM
-├── docker-compose.yml          # Jantung orkestrasi Full-Stack Docker
-├── Meeting_Notetaker.json      # Backup cetak biru workflow n8n
-├── main.py                     # Script runner aplikasi
-├── pyproject.toml              # Kunci manifes manajemen library oleh UV
-├── uv.lock                     # Lockfile UV untuk stabilitas versi library
-└── README.md                   # Dokumentasi panduan ini
+│
+├── app
+│   ├── routers
+│   │   └── summarize.py
+│   │
+│   ├── schemas
+│   │
+│   ├── services
+│   │   ├── aggregation.py
+│   │   ├── chunking.py
+│   │   ├── llm_service.py
+│   │   ├── pipeline.py
+│   │   ├── preprocessing.py
+│   │   ├── speech_to_text.py
+│   │   │
+│   │   └── providers
+│   │       ├── llm
+│   │       │   ├── anthropic_llm.py
+│   │       │   ├── gemini_llm.py
+│   │       │   ├── groq_llm.py
+│   │       │   └── openai_llm.py
+│   │       │
+│   │       └── stt
+│   │           ├── gemini_stt.py
+│   │           ├── groq_stt.py
+│   │           ├── local_whisper_stt.py
+│   │           └── openai_stt.py
+│   │
+│   ├── utils
+│   │   ├── logger.py
+│   │   └── utils.py
+│   │
+│   ├── __init__.py
+│   └── app.py
+│
+├── input
+├── outputs
+│
+├── .env
+├── .env.example
+├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── main.py
+├── pyproject.toml
+├── requirements.txt
+├── requirements-local-whisper.txt
+├── uv.lock
+└── README.md
 ```
 
-## Panduan Menjalankan Sistem 
-Ikuti 3 langkah mudah ini untuk memindahkan dan menyalakan project di laptop lain:
+---
 
-### Langkah 1: Siapkan File Environment (.env)
-Pastikan kamu sudah membuat file bernama .env di folder utama project dan isi dengan API Key Groq kamu:
+# Workflow
 
+```text
+Audio / Transcript
+        ↓
+Preprocessing
+        ↓
+Chunking
+        ↓
+Chunk Summary
+        ↓
+Aggregation
+        ↓
+Final Summary
+        ↓
+JSON Output
+        ↓
+n8n
+ ├── WhatsApp
+ └── Email
+```
 
-```bash
+---
 
-GROQ_API_KEY=gsk_your_real_api_key_here
-LLM_MODEL=llama-3.1-8b-instant
+# Environment Variables
+
+Create a `.env` file:
+
+```env
+# STT Provider
+# groq | openai | gemini | local
+STT_PROVIDER=groq
+
+# API Keys
+GROQ_API_KEY=
+OPENAI_API_KEY=
+GOOGLE_API_KEY=
+ANTHROPIC_API_KEY=
+
+# Local Whisper
 WHISPER_MODEL=base
 
+# LLM Provider
+# groq | openai | gemini | anthropic
+LLM_PROVIDER=groq
+
+# Models
+CHUNK_MODEL=llama-3.1-8b-instant
+FINAL_MODEL=llama-3.3-70b-versatile
+
+# Chunking
 CHUNK_SIZE=3000
 CHUNK_OVERLAP=200
 ```
 
-### Langkah 2: Nyalakan Semua Service via Docker
-Buka PowerShell atau CMD, masuk ke dalam folder meeting-summary, lalu jalankan perintah sakti ini:
+---
 
-```powersheel
-docker compose up -d
+# Installation
+
+## Using uv
+
+Install dependencies:
+
+```bash
+uv sync
 ```
-*Catatan Penting Penggunaan Pertama*:
 
-- Saat pertama kali dijalankan di laptop baru, Docker akan otomatis mendownload library Python menggunakan uv sync di latar belakang selama kurang lebih 1-2 menit.
+Run application:
 
-- Berkat sistem uv-cache yang tertanam pada docker-compose, untuk penyalaan berikutnya (docker compose up atau down) sistem akan langsung aktif instan dalam waktu 2 detik tanpa download ulang.
+```bash
+uv run main.py
+```
 
-### Langkah 3: Import Workflow ke n8n (Hanya Sekali di Awal)
-Buka dashboard otomasi n8n di browser: http://localhost:5678
+Swagger UI:
 
-- Daftarkan akun admin baru jika diminta (bebas isi email & password).
-
-- Di dalam lembar kerja kosong, klik tombol titik tiga (⋮) di pojok kanan atas layar.
-
-- Pilih Import from File, lalu arahkan ke file cadangan Meeting_Notetaker.json yang ada di folder project kamu.
-
-Aktifkan workflow tersebut (geser sakelar ke posisi Active di pojok kanan atas).
-
-#### Panduan Integrasi WhatsApp & Email (Wajib di Awal)
-
-Agar fitur pengiriman otomatis (Dual-Channel Delivery) ke WhatsApp dan Email berjalan dengan lancar, kamu wajib melakukan inisialisasi dua gerbang komunikasi ini saat pertama kali setup:
-
-#### 1. Aktivasi & Koneksi WhatsApp API (Baileys)
-Service `wa-api` berjalan secara mandiri di port `3000`. Agar sistem bisa mengirimkan chat atas nama nomor WhatsApp kamu, ikuti trik sinkronisasi ini:
-
-1. Pastikan seluruh container Docker sudah menyala (`docker compose up -d`).
-2. Buka aplikasi **Docker Desktop** di laptop kamu.
-3. Klik pada container bernama **`wa-api`**, lalu masuk ke tab **Logs**.
-4. Di terminal log tersebut, kamu akan melihat sebuah **QR Code** berukuran besar yang dicetak oleh sistem Baileys.
-5. Ambil HP kamu, buka **WhatsApp** -> ketuk menu **Perangkat Tertaut (Linked Devices)** -> klik **Tautkan Perangkat**, lalu arahkan kamera HP untuk **Scan QR Code** yang ada di log Docker tersebut.
-6. Begitu sukses, log Docker akan memunculkan tulisan `[WA-API] Connection Open / Logged In`. 
-7. *Keunggulan Sistem:* Token login akan otomatis terkunci di dalam folder `./auth_info_baileys` di laptopmu. Jadi, meskipun Docker kamu matikan atau laptop kamu restart, WhatsApp akan **tetap otomatis login** selamanya tanpa perlu scan ulang!
-
-#### 2. Konfigurasi Pengiriman Email via Google (GCP / App Password)
-Workflow n8n membutuhkan akses aman ke server SMTP Google agar bisa mengirim notifikasi notulen rapat via Gmail kamu. Karena Google melarang penggunaan password utama demi keamanan, kita wajib menggunakan **App Password**:
-
-1. Buka pengaturan akun Google kamu di [Google Account Security](https://myaccount.google.com/security).
-2. Pastikan Akun Google kamu sudah mengaktifkan **Verifikasi 2 Langkah (2-Step Verification)**.
-3. Ketik kata kunci **"Sandi Aplikasi"** atau **"App Passwords"** pada kolom pencarian di bagian atas akun Google kamu.
-4. Buat sandi aplikasi baru, beri nama (contoh: `n8n MoM Notetaker`), lalu klik **Buat (Create)**.
-5. Google akan memunculkan **16 digit kode rahasia** (tanpa spasi). Salin kode tersebut!
-6. Buka dashboard **n8n** (`http://localhost:5678`), masuk ke node **Gmail / SMTP Email**, lalu masukkan kredensial berikut:
-   - **User:** Email Gmail kamu (`emailkamu@gmail.com`)
-   - **Password:** Masukkan *16 digit kode Sandi Aplikasi* yang kamu salin tadi (bukan password email utama kamu).
-   - **SSL/TLS:** Enabled (Port 465) atau STARTTLS (Port 587).
-7. Klik **Test Connection** di n8n untuk memastikan email siap mengirim rangkuman rapat secara otomatis.
-
-## Endpoint Developer & Swagger UI
-Jika kamu ingin menguji performa backend AI secara manual atau membaca spesifikasi skema datanya, kamu bisa mengakses Dokumentasi API Interaktif (Swagger UI) pada alamat berikut:
-
+```text
 http://localhost:8000/docs
+```
 
-POST /summarize: Endpoint utama yang menerima file .mp3, .wav, .txt, .srt, atau .vtt untuk dianalisis oleh AI pipeline menjadi struktur JSON MoM yang rapi.
+---
+
+# Docker
+
+Build:
+
+```bash
+docker compose build
+```
+
+Run:
+
+```bash
+docker compose up
+```
+
+API Documentation:
+
+```text
+http://localhost:8000/docs
+```
+
+---
+
+# API
+
+## POST /summarize
+
+Supported files:
+
+* `.mp3`
+* `.wav`
+* `.m4a`
+* `.mp4`
+* `.txt`
+* `.vtt`
+* `.srt`
+
+Response:
+
+```json
+{
+  "summary": "",
+  "key_discussions": [],
+  "decisions": [],
+  "action_items": []
+}
+```
+
+---
+
+# Supported Providers
+
+## Speech-to-Text
+
+* Groq
+* OpenAI
+* Gemini
+* Local Whisper (optional)
+
+## LLM
+
+* Groq
+* OpenAI
+* Gemini
+* Anthropic
+
+---
+
+# Deployment
+
+Supported platforms:
+
+* Docker
+* Railway
+
+Integration:
+
+* n8n
+* WhatsApp
+* Email
+
+---
+
+# Architecture
+
+```text
+Client
+   ↓
+FastAPI
+   ↓
+Speech-to-Text Provider
+   ↓
+Preprocessing
+   ↓
+Chunking
+   ↓
+LLM Provider
+   ↓
+Aggregation
+   ↓
+JSON Response
+   ↓
+n8n
+ ├── WhatsApp
+ └── Email
+```
+

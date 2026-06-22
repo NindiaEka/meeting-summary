@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from langchain_groq import ChatGroq
+from app.services.llm_service import get_llm
 
 from app.services.preprocessing import preprocessing_text
 from app.services.chunking import chunk_text
@@ -13,13 +13,6 @@ from app.utils.logger import logger
 
 import os
 import time
-
-
-llm = ChatGroq(
-    model=os.getenv("LLM_MODEL"),
-    api_key=os.getenv("GROQ_API_KEY"),
-)
-
 
 TEXT_EXTENSIONS = (
     ".txt",
@@ -56,6 +49,14 @@ def process_text(transcript):
         f"Total chunks: {len(chunks)}"
     )
 
+    chunk_llm = get_llm(
+        os.getenv("CHUNK_MODEL")
+    )
+
+    final_llm = get_llm(
+        os.getenv("FINAL_MODEL")
+    )
+
     all_results = []
 
     for idx, chunk in enumerate(chunks):
@@ -66,32 +67,40 @@ def process_text(transcript):
             f"Processing chunk {idx + 1}"
         )
 
-        # UPGRADE PROMPT CHUNK: Memaksa AI mengekstrak detail maksimal per bagian
         prompt = f"""
-You are an expert Corporate Secretary. Analyze this transcript chunk and extract highly detailed information for Minutes of Meeting (MoM). Do not oversimplify.
+You are an expert Corporate Secretary.
 
-Output MUST be a valid JSON with this exact format (Use professional Indonesian):
+Analyze this transcript chunk and extract important information.
+
+Output MUST be valid JSON with this format:
+
 {{
-    "summary": "Tuliskan ringkasan naratif yang panjang, padat, dan komprehensif dari chunk ini (minimal 1-2 paragraf lengkap). Jelaskan latar belakang dan konteks bisnis dari topik dibahas.",
+    "summary": "Ringkasan naratif singkat dari bagian ini.",
     "key_discussions": [
-        "Detail pembahasan topik A termasuk latar belakang, tantangan teknis/operasional, dan argumen yang muncul",
-        "Detail pembahasan topik B termasuk alasan, perbandingan opsi, dan analisis situasi lapangan"
+        "Topik pembahasan utama"
     ],
     "decisions": [
-        "Keputusan resmi resmi yang disepakati beserta alasan atau dasar hukum/bisnisnya"
+        "Keputusan yang disepakati"
     ],
     "action_items": [
-        "Tugas spesifik A [PIC: Tim Terkait/Sebutkan Nama] [Deadline: Sebutkan jika ada/ASAP]",
-        "Tugas spesifik B [PIC: Tim Terkait/Sebutkan Nama] [Deadline: Sebutkan jika ada/ASAP]"
+        "Tugas yang harus dilakukan [PIC] [Deadline]"
     ]
 }}
 
 STRICT RULES:
+
 1. Write 100% in professional Indonesian.
-2. Provide rich, long, and informative text for each field. Avoid single-word or short bullet points.
-3. If PIC or deadline information is not explicitly mentioned, append '[PIC: Akan ditentukan / Tim Terkait]' or '[Deadline: Segera]'.
+2. Do not repeat information.
+3. Keep summary concise (maximum 1 paragraph).
+4. Maximum 5 key discussions.
+5. Maximum 5 decisions.
+6. Maximum 5 action items.
+7. Return valid JSON only.
+8. Do not wrap with ```json.
+9. Do not add explanations outside JSON.
 
 Transcript Chunk:
+
 {chunk}
 """
 
@@ -99,7 +108,9 @@ Transcript Chunk:
             "Sending request to LLM..."
         )
 
-        response = llm.invoke(prompt)
+        response = chunk_llm.invoke(
+            prompt
+        )
 
         chunk_end_time = time.time()
 
@@ -124,42 +135,40 @@ Transcript Chunk:
 
     # UPGRADE FINAL PROMPT: Konsolidasi total menjadi dokumen MoM eksekutif yang kaya insight
     final_prompt = f"""
-You are an expert Project Manager. Consolidate the following meeting summary data into a comprehensive, highly detailed, and professional corporate Minutes of Meeting (MoM). Your goal is to give maximum operational insights to the team.
+You are an expert Project Manager.
 
-Output MUST be a valid JSON with this exact format (Use professional Indonesian):
+Combine the following meeting summaries into a professional Minutes of Meeting (MoM).
+
+Output MUST be valid JSON:
+
 {{
-    "summary": "Tuliskan ringkasan eksekutif secara mendalam dan naratif (minimal 2-3 paragraf panjang). Harus mencakup latar belakang pertemuan, tantangan utama yang dibahas (seperti integrasi sistem Singapura-Indonesia, kebutuhan spesifikasi 2 VCPU, migrasi database via PCBU, administrasi SPASPS/SPH/DPG/topner, dan pameran/survei), serta arah strategis perusahaan.",
-    "key_discussions": [
-        "**Integrasi & Pengembangan API:** Penjelasan detail mengenai rencana menghubungkan Singapura ke Indonesia, urgensi, hambatan teknis, dan arsitekturnya.",
-        "**Infrastruktur & Spesifikasi VCPU:** Detail alasan teknis pemilihan spesifikasi 2 VCPU untuk pengembangan sistem baru serta kapasitas performa yang ditargetkan.",
-        "**Migrasi Data & Database Baru:** Konteks mendalam mengenai penggunaan PCBU, transisi ke database baru, mitigasi risiko kehilangan data, dan timeline kerja.",
-        "**Aspek Komersial, Kontrak & Legalitas:** Penjelasan komprehensif mengenai kontrak BP city, lisensi impor, pemenuhan dokumen SPASPS, SPH (Service Point of Interaction), DPG, dan koordinasi finansial (FI).",
-        "**Survei & Strategi Lapangan:** Hasil temuan lapangan mengenai survei target serta persiapan materi presentasi internal ('gua')."
-    ],
-    "decisions": [
-        "Keputusan resmi A yang diambil beserta urgensi atau argumen dasarnya.",
-        "Keputusan resmi B terkait infrastruktur/legalitas beserta penjelasannya."
-    ],
-    "action_items": [
-        "[ ] **Pengembangan API Regional:** Tim Dev/PIC wajib menyelesaikan arsitektur API penghubung Singapura-Indonesia termasuk enkripsi data [Target: ASAP/Sebutkan Timeline].",
-        "[ ] **Migrasi Data via PCBU:** Tim Data Engineer melakukan uji coba (dry-run) migrasi data ke database baru guna memastikan nol risiko data corrupt [Target: ASAP/Sebutkan Timeline].",
-        "[ ] **Finalisasi Dokumen Legal & Lisensi:** Tim Legal/Operasional segera merampungkan administrasi SPASPS, SPH, kontrak BP city, serta kebutuhan lisensi impor [Target: ASAP/Sebutkan Timeline].",
-        "[ ] **Survei Lapangan & Dokumentasi:** Tim Terkait menyusun laporan lengkap hasil survei target untuk bahan presentasi final [Target: ASAP/Sebutkan Timeline]."
-    ]
+    "summary": "Ringkasan eksekutif meeting.",
+    "key_discussions": [],
+    "decisions": [],
+    "action_items": []
 }}
 
 STRICT RULES:
-1. Do not use short bullet points for the summary or key discussions. Force the AI to output detailed, long, and rich text.
-2. Write 100% in professional Indonesian.
-3. Keep the JSON keys exactly as requested.
+
+1. Write 100% in professional Indonesian.
+2. Avoid repeating information.
+3. Summary maximum 2 paragraphs.
+4. Maximum 10 key discussions.
+5. Maximum 10 decisions.
+6. Maximum 10 action items.
+7. Merge similar items into one.
+8. Return valid JSON only.
+9. Do not wrap JSON with ```json.
+10. Do not add explanations outside JSON.
 
 Summary Meeting Data:
+
 {combined_summary}
 """
 
     final_start_time = time.time()
 
-    final_response = llm.invoke(
+    final_response = final_llm.invoke(
         final_prompt
     )
 
@@ -170,6 +179,8 @@ Summary Meeting Data:
         f"{final_end_time - final_start_time:.2f} seconds."
     )
 
+    logger.info(final_response.content)
+    
     final_result = safe_json_loads(
         final_response.content
     )
